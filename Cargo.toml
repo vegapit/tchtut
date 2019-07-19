@@ -1,0 +1,8 @@
+[package]
+name = "tchtut"
+version = "0.1.0"
+authors = ["vegapit"]
+edition = "2018"
+
+[dependencies]
+tch = "0.1"
