@@ -4,7 +4,7 @@ Source code for a tutorial on how to use the Torch in Rust with the [tch-rs](htt
 
 The full tutorial is available on the [Vegapit](http://vegapit.com) blog 
 
-It is comprised of 2 examples which can be run by calling:
+It is comprised of 3 examples which can be run by calling:
 
 `cargo run --release --example blackpricing`
 
