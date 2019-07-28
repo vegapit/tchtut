@@ -13,6 +13,7 @@ fn black76(epsilon: &Tensor, f: &Tensor, k: &Tensor, t: &Tensor, sigma: &Tensor,
 }
 
 fn main() {
+    
     let epsilon = Tensor::from(1f64);
     let f = Tensor::from(100f64).set_requires_grad(true);
     let k = Tensor::from(100f64);

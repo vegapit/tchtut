@@ -9,3 +9,5 @@ It is comprised of 2 examples which can be run by calling:
 `cargo run --release --example blackpricing`
 
 `cargo run --release --example impliedvol`
+
+`cargo run --release --example kuhnpokerpg`

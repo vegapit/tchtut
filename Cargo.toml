@@ -5,4 +5,21 @@ authors = ["vegapit"]
 edition = "2018"
 
 [dependencies]
-tch = "0.1"
+tch = { git = 'https://github.com/LaurentMazare/tch-rs' }
+indicatif = "0.11"
+plotters = "0.2"
+
+[lib]
+crate-type = ["dylib","rlib"]
+
+[[example]]
+name = "kuhnpokerpg"
+path = "examples/kuhnpokerpg.rs"
+
+[[example]]
+name = "impliedvol"
+path = "examples/impliedvol.rs"
+
+[[example]]
+name = "blackpricing"
+path = "examples/blackpricing.rs"
