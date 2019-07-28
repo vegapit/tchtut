@@ -284,33 +284,35 @@ impl KuhnPoker {
             bar.inc(1);
         }
         
-        println!("Policy 1A");
-        actor1A.forward( &Tensor::of_slice(&[-1f32]).unsqueeze(1) ).print();
-        actor1A.forward( &Tensor::of_slice(&[0f32]).unsqueeze(1) ).print();
-        actor1A.forward( &Tensor::of_slice(&[1f32]).unsqueeze(1) ).print();
-        println!("Policy 1B");
-        actor1B.forward( &Tensor::of_slice(&[-1f32]).unsqueeze(1) ).print();
-        actor1B.forward( &Tensor::of_slice(&[0f32]).unsqueeze(1) ).print();
-        actor1B.forward( &Tensor::of_slice(&[1f32]).unsqueeze(1) ).print();
-        println!("Policy 2A");
-        actor2A.forward( &Tensor::of_slice(&[-1f32]).unsqueeze(1) ).print();
-        actor2A.forward( &Tensor::of_slice(&[0f32]).unsqueeze(1) ).print();
-        actor2A.forward( &Tensor::of_slice(&[1f32]).unsqueeze(1) ).print();
-        println!("Policy 2B");
-        actor1B.forward( &Tensor::of_slice(&[-1f32]).unsqueeze(1) ).print();
-        actor1B.forward( &Tensor::of_slice(&[0f32]).unsqueeze(1) ).print();
-        actor1B.forward( &Tensor::of_slice(&[1f32]).unsqueeze(1) ).print();
+        bar.finish();
+
+        let states_sample = &Tensor::of_slice(&[-1f32, 0f32, 1f32]).view([3,1]);
+
+        fn format_policy(v: &Tensor) {
+            println!( "J : {:.2}% | {:.2}%", 100.0 * f64::from( v.i((0,0)) ), 100.0 * f64::from( v.i((0,1)) ) );
+            println!( "Q : {:.2}% | {:.2}%", 100.0 * f64::from( v.i((1,0)) ), 100.0 * f64::from( v.i((1,1)) ) );
+            println!( "K : {:.2}% | {:.2}%", 100.0 * f64::from( v.i((2,0)) ), 100.0 * f64::from( v.i((2,1)) ) );
+        }
+
+        println!("Policy 1A (CHECK | BET)");
+        let v1A = actor1A.forward( &states_sample );
+        format_policy( &v1A );
+
+        println!("Policy 1B (FOLD | CALL)");
+        let v1B = actor1B.forward( &states_sample );
+        format_policy( &v1B );
         
-        let V0 = f64::from( critic1A.forward( &Tensor::of_slice(&[-1f32]).unsqueeze(1) ).i((0,0)) );
-        let V1 = f64::from( critic1A.forward( &Tensor::of_slice(&[0f32]).unsqueeze(1) ).i((0,0)) );
-        let V2 = f64::from( critic1A.forward( &Tensor::of_slice(&[1f32]).unsqueeze(1) ).i((0,0)) );
-        println!("Player 1 Edge:");
-        let edge = (V0+V1+V2)/3.0;
-        println!("{}", edge);
-        println!("{}", V0);
-        println!("{}", V1);
-        println!("{}", V2);
+        println!("Policy 2A (FOLD | CALL)");
+        let v2A = actor2A.forward( &states_sample );
+        format_policy( &v2A );
         
+        println!("Policy 2B (CHECK | BET)");
+        let v2B = actor2B.forward( &states_sample );
+        format_policy( &v2B );
+        
+        let values1A = Vec::<f64>::from( critic1A.forward( &states_sample ).view([3,1]) );
+        println!("Player1 edge: {:.4}", &values1A.iter().sum::<f64>() / 3f64 );
+
         (loss_critic_data,loss_actor_data)
     }
 }
