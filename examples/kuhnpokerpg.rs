@@ -58,7 +58,7 @@ fn plot(data1: Vec<(f32,f32)>,data2: Vec<(f32,f32)>) -> Result<(), Box<dyn std::
 
 fn main() {
     
-    let kuhnpoker = KuhnPoker::new(1e-3, 1e-1);
+    let kuhnpoker = KuhnPoker::new(1e-3, 2e-1);
     let algo = PolicyGradientAlgorithm::ProximalPolicyOptimisation;
     let (loss_critic,loss_actor) = kuhnpoker.train(&algo, 1000, 100);
     plot(loss_critic,loss_actor).expect("Plot function failed");

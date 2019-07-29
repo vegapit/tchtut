@@ -175,7 +175,7 @@ impl KuhnPoker {
             let mut counter = 0;
             loop {
 
-                let shuffle = Tensor::of_slice(&[1f32/3f32,1f32/3f32,1f32/3f32]).multinomial(2, false).to_kind(Kind::Float);
+                let shuffle = Tensor::of_slice(&[1f32,1f32,1f32]).multinomial(2, false).to_kind(Kind::Float);
 
                 let mut cards : [i64; 2] = [0, 0];
                 cards.copy_from_slice( Vec::<i64>::from(&shuffle).as_slice() );
@@ -231,7 +231,7 @@ impl KuhnPoker {
                     let baselines_t = Tensor::stack( baseline_sets[k].as_slice(), 0 );
                     let probs_t = Tensor::stack( probs_sets[k].as_slice(), 0 );
 
-                    let action_mask = Tensor::zeros( &[sample_size,2], (Kind::Float,Device::Cpu) ).scatter_( 1, &actions_t, &Tensor::from(1f32) );
+                    let action_mask = Tensor::zeros( &[sample_size,2], (Kind::Float,Device::Cpu) ).scatter1( 1, &actions_t, 1.0 );
                     
                     let probs = ( actors[k].forward(&states_t) * &action_mask ).sum2(&[1], false);
                     let advantages = &rewards_t - baselines_t;
@@ -315,4 +315,5 @@ impl KuhnPoker {
 
         (loss_critic_data,loss_actor_data)
     }
+
 }
