@@ -1,9 +1,0 @@
-language: rust
-
-rust:
-  - stable
-
-script:
-  - cargo build --release --example blackpricing
-  - cargo build --release --example impliedvol
-  - cargo build --release --example kuhnpokerpg
