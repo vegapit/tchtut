@@ -8,7 +8,7 @@ use tchtut::{KuhnPoker,PolicyGradientAlgorithm};
 fn plot(data1: Vec<(f32,f32)>,data2: Vec<(f32,f32)>) -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new("result.png", (1024, 768)).into_drawing_area();
     
-    root.fill(&White)?;
+    root.fill(&WHITE)?;
     
     let root = root
         .margin(0, 0, 0, 20);
@@ -24,14 +24,14 @@ fn plot(data1: Vec<(f32,f32)>,data2: Vec<(f32,f32)>) -> Result<(), Box<dyn std::
     chart1.configure_mesh().draw()?;
 
     chart1.draw_series(
-        LineSeries::new(data1, &Blue)
+        LineSeries::new(data1, &BLUE)
     )?
         .label("Critic")
-        .legend( |(x,y)| Path::new(vec![(x,y), (x + 20,y)], &Blue) );
+        .legend( |(x,y)| Path::new(vec![(x,y), (x + 20,y)], &BLUE) );
 
     chart1.configure_series_labels()
-        .background_style( &White.mix(0.8) )
-        .border_style( &Black )
+        .background_style( &WHITE.mix(0.8) )
+        .border_style( &BLACK )
         .draw()?;
 
     let mut chart2 = ChartBuilder::on(&areas[1])
@@ -43,14 +43,14 @@ fn plot(data1: Vec<(f32,f32)>,data2: Vec<(f32,f32)>) -> Result<(), Box<dyn std::
     chart2.configure_mesh().draw()?;
 
     chart2.draw_series(
-        LineSeries::new(data2, &Red)
+        LineSeries::new(data2, &RED)
     )?
         .label("Actor")
-        .legend( |(x,y)| Path::new(vec![(x,y), (x + 20,y)], &Red) );
+        .legend( |(x,y)| Path::new(vec![(x,y), (x + 20,y)], &RED) );
 
     chart2.configure_series_labels()
-        .background_style( &White.mix(0.8) )
-        .border_style( &Black )
+        .background_style( &WHITE.mix(0.8) )
+        .border_style( &BLACK )
         .draw()?;
 
     Ok(())

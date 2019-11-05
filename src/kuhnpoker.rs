@@ -59,7 +59,7 @@ impl KuhnPoker {
             .add( nn::linear(&p / "actor_layer1_1A", 1, 7, Default::default()) )
             .add_fn(|xs| xs.relu())
             .add( nn::linear(&p / "actor_layer2_1A", 7, 2, Default::default()) )
-            .add_fn(|xs| xs.softmax(1))
+            .add_fn(|xs| xs.softmax(1, Kind::Float))
     }
 
     fn actor2A_builder(p: nn::Path) -> nn::Sequential {
@@ -67,7 +67,7 @@ impl KuhnPoker {
             .add( nn::linear(&p / "actor_layer1_2A", 1, 7, Default::default()) )
             .add_fn(|xs| xs.relu())
             .add( nn::linear(&p / "actor_layer2_2A", 7, 2, Default::default()) )
-            .add_fn(|xs| xs.softmax(1))
+            .add_fn(|xs| xs.softmax(1, Kind::Float))
     }
 
     fn actor2B_builder(p: nn::Path) -> nn::Sequential {
@@ -75,7 +75,7 @@ impl KuhnPoker {
             .add( nn::linear(&p / "actor_layer1_2B", 1, 7, Default::default()) )
             .add_fn(|xs| xs.relu())
             .add( nn::linear(&p / "actor_layer2_2B", 7, 2, Default::default()) )
-            .add_fn(|xs| xs.softmax(1))
+            .add_fn(|xs| xs.softmax(1, Kind::Float))
     }
 
     fn actor1B_builder(p: nn::Path) -> nn::Sequential {
@@ -83,7 +83,7 @@ impl KuhnPoker {
             .add( nn::linear(&p / "actor_layer1_1B", 1, 7, Default::default()) )
             .add_fn(|xs| xs.relu())
             .add( nn::linear(&p / "actor_layer2_1B", 7, 2, Default::default()) )
-            .add_fn(|xs| xs.softmax(1))
+            .add_fn(|xs| xs.softmax(1, Kind::Float))
     }
 
     // Critics
@@ -144,15 +144,15 @@ impl KuhnPoker {
         let critic2B = KuhnPoker::critic2B_builder( vs_critic2B.root() );
         let critic1B = KuhnPoker::critic1B_builder( vs_critic1B.root() );
         
-        let opt_actor1A = nn::Adam::default().build( &vs_actor1A, self.lr ).unwrap();
-        let opt_actor2A = nn::Adam::default().build( &vs_actor2A, self.lr ).unwrap();
-        let opt_actor2B = nn::Adam::default().build( &vs_actor2B, self.lr ).unwrap();
-        let opt_actor1B = nn::Adam::default().build( &vs_actor1B, self.lr ).unwrap();
+        let mut opt_actor1A = nn::Adam::default().build( &vs_actor1A, self.lr ).unwrap();
+        let mut opt_actor2A = nn::Adam::default().build( &vs_actor2A, self.lr ).unwrap();
+        let mut opt_actor2B = nn::Adam::default().build( &vs_actor2B, self.lr ).unwrap();
+        let mut opt_actor1B = nn::Adam::default().build( &vs_actor1B, self.lr ).unwrap();
         
-        let opt_critic1A = nn::Adam::default().build( &vs_critic1A, self.lr ).unwrap();
-        let opt_critic2A = nn::Adam::default().build( &vs_critic2A, self.lr ).unwrap();
-        let opt_critic2B = nn::Adam::default().build( &vs_critic2B, self.lr ).unwrap();
-        let opt_critic1B = nn::Adam::default().build( &vs_critic1B, self.lr ).unwrap();
+        let mut opt_critic1A = nn::Adam::default().build( &vs_critic1A, self.lr ).unwrap();
+        let mut opt_critic2A = nn::Adam::default().build( &vs_critic2A, self.lr ).unwrap();
+        let mut opt_critic2B = nn::Adam::default().build( &vs_critic2B, self.lr ).unwrap();
+        let mut opt_critic1B = nn::Adam::default().build( &vs_critic1B, self.lr ).unwrap();
         
         let mut loss_actor_data : Vec<(f32,f32)> = Vec::new();
         let mut loss_critic_data : Vec<(f32,f32)> = Vec::new();
@@ -233,11 +233,11 @@ impl KuhnPoker {
 
                     let action_mask = Tensor::zeros( &[sample_size,2], (Kind::Float,Device::Cpu) ).scatter1( 1, &actions_t, 1.0 );
                     
-                    let probs = ( actors[k].forward(&states_t) * &action_mask ).sum2(&[1], false);
+                    let probs = ( actors[k].forward(&states_t) * &action_mask ).sum1(&[1], false, Kind::Float);
                     let advantages = &rewards_t - baselines_t;
                     let loss_actor = match algo {
-                        PolicyGradientAlgorithm::ProximalPolicyOptimisation => -self.ppo_g( &advantages ).min1( &(&advantages * &probs.unsqueeze(1) / &probs_t) ).mean(),
-                        PolicyGradientAlgorithm::VanillaPolicyGradient => -( &advantages * &probs.unsqueeze(1) ).mean()
+                        PolicyGradientAlgorithm::ProximalPolicyOptimisation => -self.ppo_g( &advantages ).min1( &(&advantages * &probs.unsqueeze(1) / &probs_t) ).mean( Kind::Float ),
+                        PolicyGradientAlgorithm::VanillaPolicyGradient => -( &advantages * &probs.unsqueeze(1) ).mean( Kind::Float )
                     };
 
                     match k {
@@ -251,7 +251,7 @@ impl KuhnPoker {
                     loss_actors += f32::from(&loss_actor) * 0.25;
                     
                     let values = critics[k].forward( &states_t );
-                    let loss_critic = ( &rewards_t - values ).pow(2f64).mean();
+                    let loss_critic = ( &rewards_t - values ).pow(2f64).mean( Kind::Float );
                     
                     match k {
                         0 => opt_critic1A.backward_step( &loss_critic ),

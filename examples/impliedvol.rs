@@ -1,6 +1,6 @@
 extern crate tch;
 
-use tch::{nn, Tensor, nn::OptimizerConfig};
+use tch::{nn, Tensor, Kind, nn::OptimizerConfig};
 
 fn norm_cdf(x: &Tensor) -> Tensor {
     0.5 * ( 1.0 + ( x / Tensor::from(2.0).sqrt() ).erf() )
@@ -24,7 +24,7 @@ fn main() {
     
     let vs = nn::VarStore::new( tch::Device::Cpu );
     let black76_volsolver = func_builder( vs.root() );
-    let opt = nn::Adam::default().build(&vs, 1e-2).unwrap();
+    let mut opt = nn::Adam::default().build(&vs, 1e-2).unwrap();
 
     let epsilon = Tensor::from(1f64);
     let f = Tensor::from(100f64);
@@ -34,7 +34,7 @@ fn main() {
     let price = Tensor::from(11.805);
 
     loop {
-        let square_loss = (black76_volsolver(&epsilon, &f, &k, &t, &r) - &price).pow(2f64).sum();
+        let square_loss = (black76_volsolver(&epsilon, &f, &k, &t, &r) - &price).pow(2f64).sum( Kind::Float );
         opt.backward_step(&square_loss);
         println!("{}", f64::from(&square_loss) );
         if f64::from(&square_loss) < 0.0001 {
